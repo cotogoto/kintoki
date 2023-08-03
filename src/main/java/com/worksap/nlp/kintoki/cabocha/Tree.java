@@ -16,103 +16,129 @@
 
 package com.worksap.nlp.kintoki.cabocha;
 
-import com.worksap.nlp.kintoki.cabocha.util.EastAsianWidth;
-import com.worksap.nlp.sudachi.Morpheme;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.worksap.nlp.kintoki.cabocha.util.EastAsianWidth;
+import com.worksap.nlp.sudachi.Morpheme;
+
 public class Tree {
 
-    private static final String EOS_NL = "EOS\n";
+    private static final String EOS_NL   = "EOS\n";
 
-    private OutputLayerType outputLayer;
-    private String sentence = "";
-    private List<Token> tokens = new ArrayList<>();
-    private List<Chunk> chunks = new ArrayList<>();
+    private OutputLayerType     outputLayer;
 
-    public void setSentence(String sentence) {
+    private String              sentence = "";
+
+    private List <Token>        tokens   = new ArrayList <>();
+
+    private List <Chunk>        chunks   = new ArrayList <>();
+
+    public void setSentence(final String sentence) {
+
         this.sentence = sentence;
     }
 
-    public List<Token> getTokens() {
-        return tokens;
+
+    public List <Token> getTokens() {
+
+        return this.tokens;
     }
 
-    public void setTokens(List<Token> tokens) {
+
+    public void setTokens(final List <Token> tokens) {
+
         this.tokens = tokens;
     }
 
-    public List<Chunk> getChunks() {
-        return chunks;
+
+    public List <Chunk> getChunks() {
+
+        return this.chunks;
     }
 
-    public void setChunks(List<Chunk> chunks) {
+
+    public void setChunks(final List <Chunk> chunks) {
+
         this.chunks = chunks;
     }
 
+
     public String getSentence() {
-        if (isEmpty()) {
-            return sentence;
-        } else {
-            return getTokens().stream().map(Token::getSurface).collect(Collectors.joining());
+
+        if (this.isEmpty()) {
+            return this.sentence;
         }
+        return this.getTokens().stream().map(Token::getSurface).collect(Collectors.joining());
     }
 
+
     public int sentenceSize() {
+
         return this.sentence.length();
     }
 
-    public Chunk chunk(int index) {
+
+    public Chunk chunk(final int index) {
+
         return this.chunks.get(index);
     }
 
-    public Token token(int index) {
+
+    public Token token(final int index) {
+
         return this.tokens.get(index);
     }
 
-    public void read(String input, InputLayerType inputLayer) {
+
+    public void read(final String input, final InputLayerType inputLayer) {
+
         switch (inputLayer) {
-        case INPUT_RAW_SENTENCE:
-            this.sentence = input;
-            break;
-        case INPUT_POS:
-        case INPUT_CHUNK:
-        case INPUT_SELECTION:
-        case INPUT_DEP:
-            readCaboChaFormat(input, inputLayer);
-            break;
-        default:
-            throw new IllegalArgumentException("Invalid input layer");
+            case INPUT_RAW_SENTENCE:
+                this.sentence = input;
+                break;
+            case INPUT_POS:
+            case INPUT_CHUNK:
+            case INPUT_SELECTION:
+            case INPUT_DEP:
+                this.readCaboChaFormat(input, inputLayer);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid input layer");
         }
 
         // verify chunk link
-        if (getChunks().stream().map(Chunk::getLink).anyMatch(l -> l != -1 && (l >= getChunkSize() || l < -1))) {
+        if (this.getChunks().stream().map(Chunk::getLink).anyMatch(l -> l != -1 && (l >= this.getChunkSize() || l < -1))) {
             throw new IllegalArgumentException("Invalid dependencies");
         }
     }
 
-    public void read(List<Morpheme> morphemes) {
-        for (Morpheme m : morphemes) {
-            Token token = new Token();
+
+    public void read(final List <Morpheme> morphemes) {
+
+        for (final Morpheme m : morphemes) {
+            final var token = new Token();
             token.setSurface(m.surface());
             token.setNormalizedSurface(m.normalizedForm());
             token.setPos(m.partOfSpeech().get(0));
             token.setFeature(String.join(",", m.partOfSpeech()));
             token.setFeatureList(m.partOfSpeech());
-            tokens.add(token);
+            token.setReading(m.readingForm());
+            this.tokens.add(token);
         }
     }
 
-    private void readCaboChaFormat(String input, InputLayerType inputLayer) {
+
+    private void readCaboChaFormat(final String input, final InputLayerType inputLayer) {
+
         if (input.trim().isEmpty()) {
             return;
         }
-        int chunkId = 0;
-        for (String line : input.split("\n")) {
+        var chunkId = 0;
+        for (final String line : input.split("\n")) {
             if (line.trim().isEmpty()) {
                 throw new IllegalArgumentException("Invalid format");
             }
@@ -120,32 +146,34 @@ public class Tree {
                 if (inputLayer == InputLayerType.INPUT_POS) {
                     continue;
                 }
-                chunks.add(readHeader(line, chunkId));
+                this.chunks.add(this.readHeader(line, chunkId));
                 chunkId++;
             } else {
-                Token token = readToken(line);
-                getTokens().add(token);
-                if (!chunks.isEmpty() && inputLayer.getValue() > Constant.CABOCHA_INPUT_POS) {
-                    addTokenToLastChunk(token);
+                final var token = this.readToken(line);
+                this.getTokens().add(token);
+                if (!this.chunks.isEmpty() && inputLayer.getValue() > Constant.CABOCHA_INPUT_POS) {
+                    this.addTokenToLastChunk(token);
                 }
             }
         }
-        if (chunks.stream().anyMatch(c -> c.getTokenSize() == 0)) {
+        if (this.chunks.stream().anyMatch(c -> c.getTokenSize() == 0)) {
             throw new IllegalArgumentException("Empty chunk");
         }
     }
 
-    private Chunk readHeader(String line, int chunkId) {
-        String[] columns = line.split(" ");
+
+    private Chunk readHeader(final String line, final int chunkId) {
+
+        final var columns = line.split(" ");
         if (columns.length < 3 || chunkId != Integer.parseInt(columns[1])) {
             throw new IllegalArgumentException("Invalid header format");
         }
 
-        Chunk chunk = new Chunk();
+        final var chunk = new Chunk();
         chunk.setLink(Integer.parseInt(columns[2].substring(0, columns[2].length() - 1)));
 
         if (columns.length >= 4) {
-            int[] value = Arrays.stream(columns[3].split("/")).mapToInt(Integer::valueOf).toArray();
+            final var value = Arrays.stream(columns[3].split("/")).mapToInt(Integer::valueOf).toArray();
             chunk.setHeadPos(value[0]);
             chunk.setFuncPos(value[1]);
         }
@@ -161,13 +189,15 @@ public class Tree {
         return chunk;
     }
 
-    private Token readToken(String line) {
-        String[] columns = line.split("\t");
+
+    private Token readToken(final String line) {
+
+        final var columns = line.split("\t");
         if (columns.length < 2 || columns[0].isEmpty() || columns[1].isEmpty()) {
             throw new IllegalArgumentException("Invalid format");
         }
 
-        Token token = new Token();
+        final var token = new Token();
         token.setSurface(columns[0]);
         token.setNormalizedSurface(columns[0]);
         token.setFeature(columns[1]);
@@ -176,55 +206,65 @@ public class Tree {
         return token;
     }
 
-    public String toString(FormatType outputFormat) {
-        StringBuilder sb = new StringBuilder();
-        writeTree(sb, outputLayer, outputFormat);
+
+    public String toString(final FormatType outputFormat) {
+
+        final var sb = new StringBuilder();
+        this.writeTree(sb, this.outputLayer, outputFormat);
         return sb.toString();
     }
 
-    public void writeTree(StringBuilder sb, OutputLayerType outputLayer, FormatType outputFormat) {
+
+    public void writeTree(final StringBuilder sb, final OutputLayerType outputLayer, final FormatType outputFormat) {
+
         switch (outputFormat) {
-        case FORMAT_LATTICE:
-            writeLattice(sb, outputLayer);
-            break;
-        case FORMAT_TREE_LATTICE:
-            writeTree(sb);
-            writeLattice(sb, outputLayer);
-            break;
-        case FORMAT_TREE:
-            writeTree(sb);
-            break;
-        case FORMAT_XML:
-        case FORMAT_CONLL:
-            throw new UnsupportedOperationException("Not implemented");
-        case FORMAT_NONE:
-            break;
-        default:
-            throw new IllegalArgumentException("unknown format: " + outputFormat + "\n");
+            case FORMAT_LATTICE:
+                this.writeLattice(sb, outputLayer);
+                break;
+            case FORMAT_TREE_LATTICE:
+                this.writeTree(sb);
+                this.writeLattice(sb, outputLayer);
+                break;
+            case FORMAT_TREE:
+                this.writeTree(sb);
+                break;
+            case FORMAT_XML:
+            case FORMAT_CONLL:
+                throw new UnsupportedOperationException("Not implemented");
+            case FORMAT_NONE:
+                break;
+            default:
+                throw new IllegalArgumentException("unknown format: " + outputFormat + "\n");
         }
     }
 
-    private void writeLattice(StringBuilder sb, OutputLayerType outputLayer) {
+
+    private void writeLattice(final StringBuilder sb, final OutputLayerType outputLayer) {
+
         if (outputLayer == OutputLayerType.OUTPUT_RAW_SENTENCE) {
-            sb.append(getSentence());
+            sb.append(this.getSentence());
             sb.append("\n");
-        } else if (outputLayer == OutputLayerType.OUTPUT_POS) {
-            sb.append(getTokens().stream().map(t -> t.getSurface() + "\t" + t.getFeature() + "\n")
-                    .collect(Collectors.joining()));
-            sb.append(EOS_NL);
         } else {
-            int ci = 0;
-            for (Chunk chunk : getChunks()) {
-                writeChunk(sb, chunk, ci++, outputLayer);
+            if (outputLayer == OutputLayerType.OUTPUT_POS) {
+                sb.append(this.getTokens().stream().map(t -> t.getSurface() + "\t" + t.getFeature() + "\n")
+                        .collect(Collectors.joining()));
+            } else {
+                var ci = 0;
+                for (final Chunk chunk : this.getChunks()) {
+                    this.writeChunk(sb, chunk, ci, outputLayer);
+                    ci++;
+                }
             }
-            sb.append(EOS_NL);
+            sb.append(Tree.EOS_NL);
         }
     }
 
-    private void writeChunk(StringBuilder sb, Chunk chunk, int id, OutputLayerType outputLayer) {
-        writeHeader1(sb, id, (outputLayer == OutputLayerType.OUTPUT_DEP) ? chunk.getLink() : -1);
+
+    private void writeChunk(final StringBuilder sb, final Chunk chunk, final int id, final OutputLayerType outputLayer) {
+
+        this.writeHeader1(sb, id, (outputLayer == OutputLayerType.OUTPUT_DEP) ? chunk.getLink() : -1);
         if (outputLayer != OutputLayerType.OUTPUT_CHUNK) {
-            writeHeader2(sb, chunk);
+            this.writeHeader2(sb, chunk);
             if (outputLayer == OutputLayerType.OUTPUT_SELECTION && chunk.getFeatureList() != null
                     && !chunk.getFeatureList().isEmpty()) {
                 sb.append(' ').append(String.join(",", chunk.getFeatureList()));
@@ -232,43 +272,49 @@ public class Tree {
         }
         sb.append('\n');
 
-        for (Token token : chunk.getTokens()) {
+        for (final Token token : chunk.getTokens()) {
             sb.append(token.getSurface()).append('\t').append(token.getFeature()).append('\n');
         }
     }
 
-    private void writeHeader1(StringBuilder sb, int id, int link) {
+
+    private void writeHeader1(final StringBuilder sb, final int id, final int link) {
+
         sb.append("* ").append(id).append(' ').append(link).append("D");
     }
 
-    private void writeHeader2(StringBuilder sb, Chunk chunk) {
+
+    private void writeHeader2(final StringBuilder sb, final Chunk chunk) {
+
         sb.append(' ').append(chunk.getHeadPos()).append('/').append(chunk.getFuncPos()).append(' ')
                 .append(chunk.getScore());
     }
 
-    private void writeTree(StringBuilder sb) {
-        int size = getChunkSize();
-        Optional<Integer> maxLength = getChunks().stream()
+
+    private void writeTree(final StringBuilder sb) {
+
+        final var size = this.getChunkSize();
+        final Optional <Integer> maxLength = this.getChunks().stream()
                 .map(chunk -> EastAsianWidth.getEastAsianWidth(chunk.getSurface()))
                 .collect(Collectors.reducing(Integer::max));
         if (!maxLength.isPresent()) {
-            sb.append(EOS_NL);
+            sb.append(Tree.EOS_NL);
             return;
         }
-        int maxLen = maxLength.get();
-        boolean[] e = new boolean[size];
+        final int maxLen = maxLength.get();
+        final var e = new boolean[size];
 
-        for (int i = 0; i < size; ++i) {
-            boolean isDep = false;
-            int link = chunk(i).getLink();
-            String surface = chunk(i).getSurface();
-            int rem = maxLen - EastAsianWidth.getEastAsianWidth(surface) + i * 2;
-            for (int j = 0; j < rem; ++j) {
+        for (var i = 0; i < size; ++i) {
+            var isDep = false;
+            final var link = this.chunk(i).getLink();
+            final var surface = this.chunk(i).getSurface();
+            final var rem = maxLen - EastAsianWidth.getEastAsianWidth(surface) + i * 2;
+            for (var j = 0; j < rem; ++j) {
                 sb.append(' ');
             }
             sb.append(surface);
 
-            for (int j = i + 1; j < size; j++) {
+            for (var j = i + 1; j < size; j++) {
                 if (link == j) {
                     sb.append("-" + "D");
                     isDep = true;
@@ -284,30 +330,42 @@ public class Tree {
             sb.append("\n");
         }
 
-        sb.append(EOS_NL);
+        sb.append(Tree.EOS_NL);
     }
 
+
     public boolean isEmpty() {
+
         return this.tokens.isEmpty();
     }
 
+
     public int getChunkSize() {
+
         return this.chunks.size();
     }
 
+
     public int getTokenSize() {
+
         return this.tokens.size();
     }
 
+
     public OutputLayerType getOutputLayer() {
-        return outputLayer;
+
+        return this.outputLayer;
     }
 
-    public void setOutputLayer(OutputLayerType outputLayer) {
+
+    public void setOutputLayer(final OutputLayerType outputLayer) {
+
         this.outputLayer = outputLayer;
     }
 
-    private void addTokenToLastChunk(Token token) {
-        chunks.get(chunks.size() - 1).getTokens().add(token);
+
+    private void addTokenToLastChunk(final Token token) {
+
+        this.chunks.get(this.chunks.size() - 1).getTokens().add(token);
     }
 }

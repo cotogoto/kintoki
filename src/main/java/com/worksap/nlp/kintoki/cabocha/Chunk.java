@@ -20,89 +20,51 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.Data;
+
+@Data
 public class Chunk {
 
-    private int link;
-    private int headPos;
-    private int funcPos;
-    private int tokenPos;
-    private List<Token> tokens = new ArrayList<>();
-    private double score;
-    private List<String> featureList = new ArrayList<>();
+    private int           link;
 
-    public int getLink() {
-        return link;
-    }
+    private int           headPos;
 
-    public void setLink(int link) {
-        this.link = link;
-    }
+    private int           funcPos;
 
-    public int getHeadPos() {
-        return headPos;
-    }
+    private int           tokenPos;
 
-    public void setHeadPos(int headPos) {
-        this.headPos = headPos;
-    }
+    private List <Token>  tokens      = new ArrayList <>();
 
-    public int getFuncPos() {
-        return funcPos;
-    }
+    private double        score;
 
-    public void setFuncPos(int funcPos) {
-        this.funcPos = funcPos;
-    }
+    private List <String> featureList = new ArrayList <>();
 
     public int getTokenSize() {
-        return tokens.size();
+
+        return this.tokens.size();
     }
+
 
     public boolean isEmpty() {
-        return tokens.isEmpty();
+
+        return this.tokens.isEmpty();
     }
 
-    public Token token(int index) {
-        return tokens.get(index);
+
+    public Token token(final int index) {
+
+        return this.tokens.get(index);
     }
 
-    public List<Token> getTokens() {
-        return tokens;
-    }
-
-    public void setTokens(List<Token> tokens) {
-        this.tokens = tokens;
-    }
-
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
-    }
-
-    public List<String> getFeatureList() {
-        return featureList;
-    }
-
-    public void setFeatureList(List<String> featureList) {
-        this.featureList = featureList;
-    }
 
     public int getFeatureListSize() {
+
         return this.featureList.size();
     }
 
-    public int getTokenPos() {
-        return tokenPos;
-    }
-
-    public void setTokenPos(int tokenPos) {
-        this.tokenPos = tokenPos;
-    }
 
     public String getSurface() {
-        return tokens.stream().map(Token::getSurface).collect(Collectors.joining());
+
+        return this.tokens.stream().map(Token::getSurface).collect(Collectors.joining());
     }
 }

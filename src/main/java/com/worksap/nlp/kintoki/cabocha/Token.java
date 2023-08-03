@@ -19,65 +19,28 @@ package com.worksap.nlp.kintoki.cabocha;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+
+@Data
 public class Token {
 
-    private String surface;
-    private String normalizedSurface;
-    private String feature;
-    private List<String> featureList = new ArrayList<>();
-    private String additionalInfo;
-    private String pos;
+    private String        surface;
 
-    public void setFeatureList(List<String> featureList) {
-        this.featureList = featureList;
-    }
+    private String        normalizedSurface;
 
-    public List<String> getFeatureList() {
-        return featureList;
-    }
+    private String        feature;
 
-    public String getPos() {
-        return pos;
-    }
+    private List <String> featureList = new ArrayList <>();
 
-    public void setPos(String pos) {
-        this.pos = pos;
-    }
+    private String        additionalInfo;
 
-    public String getSurface() {
-        return surface;
-    }
+    private String        pos;
 
-    public void setSurface(String surface) {
-        this.surface = surface;
-    }
-
-    public String getNormalizedSurface() {
-        return normalizedSurface;
-    }
-
-    public void setNormalizedSurface(String normalizedSurface) {
-        this.normalizedSurface = normalizedSurface;
-    }
-
-    public String getFeature() {
-        return feature;
-    }
-
-    public void setFeature(String feature) {
-        this.feature = feature;
-    }
+    private String        reading;
 
     public int getFeatureListSize() {
-        return featureList.size();
-    }
 
-    public String getAdditionalInfo() {
-        return additionalInfo;
-    }
-
-    public void setAdditionalInfo(String additionalInfo) {
-        this.additionalInfo = additionalInfo;
+        return this.featureList.size();
     }
 
 }
