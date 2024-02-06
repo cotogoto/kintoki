@@ -3,7 +3,7 @@
 
     <groupId>com.worksap.nlp</groupId>
     <artifactId>kintoki</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1-SNAPSHOT</version>
     <description>Kintoki</description>
 
     <repositories>
@@ -16,7 +16,7 @@
     <scm>
         <url>https://github.com/cotogoto/kintoki</url>
         <connection>scm:git:git@github.com:cotogoto/kintoki.git</connection>
-        <tag>v0.2.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
