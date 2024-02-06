@@ -1,7 +1,6 @@
 # Kintoki
 
-[![Build](https://github.com/WorksApplications/kintoki/actions/workflows/build.yml/badge.svg)](https://github.com/WorksApplications/kintoki/actions/workflows/build.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.worksap.nlp%3Akintoki&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.worksap.nlp%3Akintoki)
+[![](https://jitpack.io/v/cotogoto/kintoki.svg)](https://jitpack.io/#cotogoto/kintoki)
 
 Kintoki is a dependency parser library.
 
@@ -12,8 +11,26 @@ This library includes followings:
 - Models for Chunking and Parsing
 
 ## Requirement
-- Java version >= 1.8.0
+- Java version >= 11
 
+## Download
+
+Be sure to replace the **VERSION** key below with the latest version listed above.
+
+Maven
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+<dependency>
+    <groupId>com.github.cotogoto</groupId>
+    <artifactId>kintoki</artifactId>
+    <version>VERSION</version>
+</dependency>
+```
 
 # Setting
 This library uses Sudachi as morphological analyzer, and provide models for Chunking and Parsing separately.
