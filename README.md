@@ -18,7 +18,7 @@ This repository is maintained as a fork.
 In this fork, we are continuously maintaining the project and applying custom modifications/improvements as needed.
 
 ## Requirement
-- Java version >= 11
+- Java version >= 17
 
 ## Download
 
