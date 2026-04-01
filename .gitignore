@@ -214,3 +214,5 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/linux,gradle,java,osx,windows,eclipse,visualstudiocode
 /target/
 .idea/
+pom.xml.releaseBackup
+release.properties
