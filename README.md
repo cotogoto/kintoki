@@ -2,6 +2,8 @@
 
 [![](https://jitpack.io/v/cotogoto/kintoki.svg)](https://jitpack.io/#cotogoto/kintoki)
 
+- 日本語版README: [README.ja.md](README.ja.md)
+
 Kintoki is a dependency parser library.
 
 This library includes followings:
@@ -9,6 +11,11 @@ This library includes followings:
 - A port of the CaboCha to Java
 - A command line tool
 - Models for Chunking and Parsing
+
+## Fork and maintenance notice
+
+This repository is maintained as a fork.
+In this fork, we are continuously maintaining the project and applying custom modifications/improvements as needed.
 
 ## Requirement
 - Java version >= 11
