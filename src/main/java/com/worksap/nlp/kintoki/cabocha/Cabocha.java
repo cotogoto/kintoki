@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class Cabocha {
@@ -36,7 +37,7 @@ public class Cabocha {
 
         FileStdoutStream(String fileName) throws IOException {
             if (Utils.check(fileName)) {
-                output = new PrintStream(fileName);
+                output = new PrintStream(fileName, StandardCharsets.UTF_8);
                 isFile = true;
             } else {
                 output = System.out;
@@ -147,6 +148,9 @@ public class Cabocha {
      *             (such as model file, resource file)
      */
     public String parseToString(String sent) throws IOException {
+        if (sent == null) {
+            throw new IllegalArgumentException("sent must not be null");
+        }
         Tree tree = parser.parse(sent);
         return tree.toString(FormatType.FORMAT_LATTICE);
     }

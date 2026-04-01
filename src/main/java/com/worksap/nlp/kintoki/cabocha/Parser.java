@@ -243,6 +243,9 @@ public class Parser {
      *         return null
      */
     public Tree parse(Tree tree) {
+        if (tree == null) {
+            throw new IllegalArgumentException("tree must not be null");
+        }
         tree.setOutputLayer(this.outputLayer);
         for (Analyzer analyzer : analyzerList) {
             analyzer.parse(tree);
@@ -258,6 +261,9 @@ public class Parser {
      * @return a tree object will be returned
      */
     public Tree parse(String text) {
+        if (text == null) {
+            throw new IllegalArgumentException("text must not be null");
+        }
         Tree tree = new Tree();
 
         try {
@@ -278,6 +284,9 @@ public class Parser {
      *         null
      */
     public String parseToString(String sent) {
+        if (sent == null) {
+            throw new IllegalArgumentException("sent must not be null");
+        }
         Tree tree = parse(sent);
         return tree.toString(outputFormat);
     }
