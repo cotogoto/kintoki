@@ -29,12 +29,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.36</version>
+            <version>1.18.44</version>
         </dependency>
         <dependency>
             <groupId>com.worksap.nlp</groupId>
             <artifactId>sudachi</artifactId>
-            <version>0.7.3</version>
+            <version>0.7.5</version>
         </dependency>
         <dependency>
             <groupId>com.worksap.nlp</groupId>
