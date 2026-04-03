@@ -67,8 +67,11 @@ public class Cabocha {
             new Option("output-layer", 'O', 4, "LAYER", "set output layer\n\t\t\t    "
                     + "1 - POS tagged layer\n\t\t\t    " + "2 - POS tagged and Chunked layer\n\t\t\t    "
                     + "3 - POS tagged, Chunked and Feature selected layer\n\t\t\t    " + "4 - Parsed layer(default)"),
+            new Option("ne", 'n', 0, "MODE", "output NE tag\n\t\t\t    " + "0 - without NE(default)\n\t\t\t    "
+                    + "1 - output NE with chunk constraint\n\t\t\t    " + "2 - output NE without chunk constraint"),
             new Option("parser-model", 'm', null, "FILE", "use FILE as parser model file"),
             new Option("chunker-model", 'M', null, "FILE", "use FILE as chunker model file"),
+            new Option("ne-model", 'N', null, "FILE", "use FILE as NE tagger model file"),
             new Option("rcfile", 'r', null, "FILE", "use FILE as resource file"),
             new Option("sudachi-dict", 'd', null, "DIR", "use DIR as sudachi dictionary directory"),
             new Option("output", 'o', null, "FILE", "use FILE as output file"),

@@ -202,6 +202,9 @@ public class Tree {
         token.setNormalizedSurface(columns[0]);
         token.setFeature(columns[1]);
         token.setFeatureList(Arrays.asList(columns[1].split(",")));
+        if (columns.length >= 3) {
+            token.setAdditionalInfo(columns[2]);
+        }
 
         return token;
     }
@@ -246,7 +249,15 @@ public class Tree {
             sb.append("\n");
         } else {
             if (outputLayer == OutputLayerType.OUTPUT_POS) {
-                sb.append(this.getTokens().stream().map(t -> t.getSurface() + "\t" + t.getFeature() + "\n")
+                sb.append(this.getTokens().stream().map(t -> {
+                    StringBuilder line = new StringBuilder();
+                    line.append(t.getSurface()).append('\t').append(t.getFeature());
+                    if (t.getAdditionalInfo() != null && !t.getAdditionalInfo().isEmpty()) {
+                        line.append('\t').append(t.getAdditionalInfo());
+                    }
+                    line.append('\n');
+                    return line.toString();
+                })
                         .collect(Collectors.joining()));
             } else {
                 var ci = 0;
@@ -273,7 +284,11 @@ public class Tree {
         sb.append('\n');
 
         for (final Token token : chunk.getTokens()) {
-            sb.append(token.getSurface()).append('\t').append(token.getFeature()).append('\n');
+            sb.append(token.getSurface()).append('\t').append(token.getFeature());
+            if (token.getAdditionalInfo() != null && !token.getAdditionalInfo().isEmpty()) {
+                sb.append('\t').append(token.getAdditionalInfo());
+            }
+            sb.append('\n');
         }
     }
 
