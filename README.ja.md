@@ -142,3 +142,58 @@ public class Example {
     }
 }
 ```
+
+## 実運用を想定した利用サンプル
+
+以下は「アプリ起動時に `Parser` を 1 度だけ初期化し、リクエストごとに `parseToString` を呼ぶ」構成のサンプルです。  
+Web API やバッチ処理などでそのまま使える最小構成になっています。
+（設定ファイルを外部指定したい場合は `new Parser("path/to/cabocharc.properties")` を使用してください。）
+
+実際のサンプルクラスは `src/test/java/com/worksap/nlp/kintoki/cabocha/ParserUsageSample.java` に追加しています。
+
+```java
+import com.worksap.nlp.kintoki.cabocha.Parser;
+
+import java.io.IOException;
+import java.util.List;
+
+public class DependencyService {
+    private final Parser parser;
+
+    public DependencyService() throws IOException {
+        this.parser = new Parser(); // resources/cabocharc.properties を使用
+        this.parser.open(); // 起動時に 1 回だけ
+    }
+
+    public String parseSentence(String sentence) {
+        return parser.parseToString(sentence);
+    }
+
+    public void parseBatch(List<String> sentences) {
+        for (String sentence : sentences) {
+            String parsed = parseSentence(sentence);
+            System.out.println(parsed);
+        }
+    }
+}
+```
+
+```java
+public class App {
+    public static void main(String[] args) throws IOException {
+        DependencyService service = new DependencyService();
+        String result = service.parseSentence("太郎は花子が読んでいる本を次郎に渡した。");
+        System.out.println(result);
+    }
+}
+```
+
+出力は以下のような CaboCha 互換フォーマットになります。
+
+```text
+* 0 5D 0/1 ...
+太郎    名詞,固有名詞,人名,名,*,*
+は      助詞,係助詞,*,*,*,*
+...
+EOS
+```
