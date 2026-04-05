@@ -16,8 +16,8 @@ public class ParserUsageSample {
     public static class DependencyService {
         private final Parser parser;
 
-        public DependencyService(String configPath) throws IOException {
-            this.parser = new Parser(configPath);
+        public DependencyService() throws IOException {
+            this.parser = new Parser();
             this.parser.open();
         }
 
@@ -34,7 +34,7 @@ public class ParserUsageSample {
     }
 
     public static void main(String[] args) throws IOException {
-        DependencyService service = new DependencyService("cabocharc.properties");
+        DependencyService service = new DependencyService();
         String result = service.parseSentence("太郎は花子が読んでいる本を次郎に渡した。");
         System.out.println(result);
     }

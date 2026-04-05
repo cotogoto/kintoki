@@ -147,6 +147,7 @@ public class Example {
 
 以下は「アプリ起動時に `Parser` を 1 度だけ初期化し、リクエストごとに `parseToString` を呼ぶ」構成のサンプルです。  
 Web API やバッチ処理などでそのまま使える最小構成になっています。
+（設定ファイルを外部指定したい場合は `new Parser("path/to/cabocharc.properties")` を使用してください。）
 
 実際のサンプルクラスは `src/test/java/com/worksap/nlp/kintoki/cabocha/ParserUsageSample.java` に追加しています。
 
@@ -159,8 +160,8 @@ import java.util.List;
 public class DependencyService {
     private final Parser parser;
 
-    public DependencyService(String configPath) throws IOException {
-        this.parser = new Parser(configPath);
+    public DependencyService() throws IOException {
+        this.parser = new Parser(); // resources/cabocharc.properties を使用
         this.parser.open(); // 起動時に 1 回だけ
     }
 
@@ -180,7 +181,7 @@ public class DependencyService {
 ```java
 public class App {
     public static void main(String[] args) throws IOException {
-        DependencyService service = new DependencyService("cabocharc.properties");
+        DependencyService service = new DependencyService();
         String result = service.parseSentence("太郎は花子が読んでいる本を次郎に渡した。");
         System.out.println(result);
     }
