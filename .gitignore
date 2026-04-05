@@ -216,3 +216,6 @@ gradle-app.setting
 .idea/
 pom.xml.releaseBackup
 release.properties
+src/test/resources/chunk.ipa.model
+src/test/resources/dep.ipa.model
+src/test/resources/ne.ipa.model
