@@ -55,8 +55,17 @@ parser-model  = dep.bccwj.model
 # Chunker model file name
 chunker-model = chunk.bccwj.model
 
+# Named entity model file name（任意）
+ne-model = ne.ipa.model
+
 # Sudachi
 sudachi-dict = ./
+
+# 固有表現モード
+# 0 - 無効（デフォルト）
+# 1 - NE 付与を有効化
+# 2 - NE 付与を有効化（kintoki では 1 と同等）
+ne = 0
 ```
 
 デフォルトでは resources 配下の `cabocharc.properties` が使われます。  

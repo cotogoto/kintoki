@@ -27,6 +27,7 @@ public class Parser {
     private InputLayerType inputLayer;
     private OutputLayerType outputLayer;
     private Param param;
+    private int ne;
 
     /**
      * Create a new instance of Parser class.
@@ -128,6 +129,7 @@ public class Parser {
         default:
             throw new IllegalArgumentException("unknown output format: " + param.getInt(Param.OUTPUT_FORMAT) + "\n");
         }
+        this.ne = param.getInt(Param.NE);
     }
 
     /**
@@ -144,18 +146,30 @@ public class Parser {
             switch (this.outputLayer) {
             case OUTPUT_POS:
                 pushAnalyzer(new MorphAnalyzer());
+                if (this.ne > 0) {
+                    pushAnalyzer(new NeAnalyzer());
+                }
                 break;
             case OUTPUT_CHUNK:
                 pushAnalyzer(new MorphAnalyzer());
+                if (this.ne > 0) {
+                    pushAnalyzer(new NeAnalyzer());
+                }
                 pushAnalyzer(new Chunker());
                 break;
             case OUTPUT_SELECTION:
                 pushAnalyzer(new MorphAnalyzer());
+                if (this.ne > 0) {
+                    pushAnalyzer(new NeAnalyzer());
+                }
                 pushAnalyzer(new Chunker());
                 pushAnalyzer(new Selector());
                 break;
             case OUTPUT_DEP:
                 pushAnalyzer(new MorphAnalyzer());
+                if (this.ne > 0) {
+                    pushAnalyzer(new NeAnalyzer());
+                }
                 pushAnalyzer(new Chunker());
                 pushAnalyzer(new Selector());
                 pushAnalyzer(new DependencyParser());
@@ -168,6 +182,9 @@ public class Parser {
 
         case INPUT_POS: // case 2
         {
+            if (this.ne > 0) {
+                pushAnalyzer(new NeAnalyzer());
+            }
             switch (this.outputLayer) {
             case OUTPUT_POS:
                 break;

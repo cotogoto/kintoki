@@ -55,8 +55,17 @@ parser-model  = dep.bccwj.model
 # Chunker model file name
 chunker-model = chunk.bccwj.model
 
+# Named entity model file name (optional)
+ne-model = ne.ipa.model
+
 # Sudachi
 sudachi-dict = ./
+
+# Named entity mode
+# 0 - disable (default)
+# 1 - enable NE tagging
+# 2 - enable NE tagging (same as 1 in kintoki)
+ne = 0
 ```
 
 About the configuration file, the `cabocharc.properties` file under the resources folder is used by default.

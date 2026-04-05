@@ -37,7 +37,9 @@ public class Param {
     public static final String OUTPUT_LAYER = "output-layer";
     public static final String PARSER_MODEL = "parser-model";
     public static final String CHUNKER_MODEL = "chunker-model";
+    public static final String NE_MODEL = "ne-model";
     public static final String SUDACHI_DICT = "sudachi-dict";
+    public static final String NE = "ne";
     public static final String OUTPUT_FORMAT = "output-format";
     public static final String RC_FILE = "rcfile";
     public static final String OUTPUT = "output";
@@ -46,7 +48,7 @@ public class Param {
     static final Pattern SHORT_OPTION_PATTERN = Pattern.compile("-([\\S&&[^-]])(\\S+)?");
 
     private static List<String> keyList = Arrays.asList(INPUT_LAYER, OUTPUT_LAYER, PARSER_MODEL, CHUNKER_MODEL,
-            SUDACHI_DICT, OUTPUT_FORMAT);
+            NE_MODEL, SUDACHI_DICT, NE, OUTPUT_FORMAT);
 
     private Map<String, Object> conf = new HashMap<>();
     private List<String> rest = new ArrayList<>();
