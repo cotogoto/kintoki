@@ -3,9 +3,7 @@ package com.worksap.nlp.kintoki.cabocha;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Practical sample for integrating {@link Parser} in an application.
@@ -111,8 +109,6 @@ public class ParserUsageSample {
     }
 
     private static void dumpTree(Tree tree, String sentence) {
-        Map<String, String> expectedMap = buildExpectedMap(sentence);
-
         System.out.println("=== Chunks / Tokens / NE ===");
 
         for (int i = 0; i < tree.getChunkSize(); i++) {
@@ -121,30 +117,17 @@ public class ParserUsageSample {
 
             for (int j = 0; j < chunk.getTokenSize(); j++) {
                 Token token = chunk.token(j);
-
                 String surface = token.getSurface();
                 String actualNe = normalizeNeLabel(token.getAdditionalInfo());
-                String expectedNe = expectedMap.getOrDefault(surface, "O");
-                String judgement = actualNe.equals(expectedNe) ? "OK" : "NG";
 
                 System.out.println("  - surface      : " + surface);
                 System.out.println("    normalized   : " + token.getNormalizedSurface());
                 System.out.println("    pos/feature  : " + token.getFeature());
                 System.out.println("    actual NE    : " + actualNe);
-                System.out.println("    expected NE  : " + expectedNe);
-                System.out.println("    judgement    : " + judgement);
             }
         }
 
         System.out.println("EOS");
-        System.out.println();
-
-        System.out.println("=== Expected NE summary ===");
-        for (Map.Entry<String, String> entry : expectedMap.entrySet()) {
-            if (!"O".equals(entry.getValue())) {
-                System.out.println(entry.getKey() + " -> " + entry.getValue());
-            }
-        }
     }
 
     private static String normalizeNeLabel(String label) {
@@ -152,45 +135,5 @@ public class ParserUsageSample {
             return "O";
         }
         return label;
-    }
-
-    /**
-     * このサンプル文専用の「想定タイプ」定義。
-     * モデル推論ではなく、確認用の正解ラベルです。
-     */
-    private static Map<String, String> buildExpectedMap(String sentence) {
-        Map<String, String> map = new LinkedHashMap<>();
-
-        // まずは全部 O 扱い
-        map.put("2026", "B-DATE");
-        map.put("年", "I-DATE");
-        map.put("4", "I-DATE");
-        map.put("月", "I-DATE");
-        map.put("1日", "I-DATE");
-
-        map.put("午後", "B-TIME");
-        map.put("3", "I-TIME");
-        map.put("時", "I-TIME");
-
-        map.put("東京", "B-LOCATION");
-        map.put("駅", "I-LOCATION");
-
-        map.put("ソニー", "B-ORGANIZATION");
-        map.put("株式", "I-ORGANIZATION");
-        map.put("会社", "I-ORGANIZATION");
-
-        map.put("山田", "B-PERSON");
-        map.put("太郎", "I-PERSON");
-
-        map.put("1万", "B-MONEY");
-        map.put("円", "I-MONEY");
-
-        map.put("3", "B-COUNT");
-        map.put("枚", "I-COUNT");
-
-        map.put("20", "B-PERCENT");
-        map.put("%", "I-PERCENT");
-
-        return map;
     }
 }
