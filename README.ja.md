@@ -147,7 +147,7 @@ public class Example {
 
 以下は「アプリ起動時に `Parser` を 1 度だけ初期化し、リクエストごとに `parseToString` を呼ぶ」構成のサンプルです。  
 Web API やバッチ処理などでそのまま使える最小構成になっています。
-（設定ファイルを外部指定したい場合は `new Parser("path/to/cabocharc.properties")` を使用してください。）
+辞書・モデルの実ファイルを引数で受け取り、存在チェックしてから `Parser` を初期化するため、実行時エラーの原因がわかりやすくなっています。
 
 実際のサンプルクラスは `src/test/java/com/worksap/nlp/kintoki/cabocha/ParserUsageSample.java` に追加しています。
 
@@ -160,8 +160,8 @@ import java.util.List;
 public class DependencyService {
     private final Parser parser;
 
-    public DependencyService() throws IOException {
-        this.parser = new Parser(); // resources/cabocharc.properties を使用
+    public DependencyService(Param param) throws IOException {
+        this.parser = new Parser(param);
         this.parser.open(); // 起動時に 1 回だけ
     }
 
@@ -181,12 +181,18 @@ public class DependencyService {
 ```java
 public class App {
     public static void main(String[] args) throws IOException {
-        DependencyService service = new DependencyService();
+        Param param = buildParam(args); // 引数: <sudachi-dict-dir> <chunker-model> <parser-model>
+        if (param == null) {
+            return;
+        }
+        DependencyService service = new DependencyService(param);
         String result = service.parseSentence("太郎は花子が読んでいる本を次郎に渡した。");
         System.out.println(result);
     }
 }
 ```
+
+引数不足の場合は Usage を表示して終了します（例外スタックトレースで落ちません）。
 
 出力は以下のような CaboCha 互換フォーマットになります。
 
