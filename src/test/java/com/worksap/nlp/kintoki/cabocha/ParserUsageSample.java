@@ -3,7 +3,9 @@ package com.worksap.nlp.kintoki.cabocha;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Practical sample for integrating {@link Parser} in an application.
@@ -27,51 +29,168 @@ public class ParserUsageSample {
             return parser.parseToString(sentence);
         }
 
+        public Tree parseSentenceAsTree(String sentence) {
+            return parser.parse(sentence);
+        }
+
         public void parseBatch(List<String> sentences) {
             for (String sentence : sentences) {
-                String parsed = parseSentence(sentence);
-                System.out.println(parsed);
+                Tree tree = parseSentenceAsTree(sentence);
+                dumpTree(tree, sentence);
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-        Param param = buildParam(args);
-        if (param == null) {
-            return;
-        }
+        Param param = buildParam();
         DependencyService service = new DependencyService(param);
-        String result = service.parseSentence("太郎は花子が読んでいる本を次郎に渡した。");
-        System.out.println(result);
+
+        String sentence = "2026年4月1日午後3時に東京駅でソニー株式会社の山田太郎が1万円のチケットを3枚購入し、売上は前年比20%増加した。";
+        Tree tree = service.parseSentenceAsTree(sentence);
+
+        System.out.println("=== Sentence ===");
+        System.out.println(sentence);
+        System.out.println();
+
+        dumpTree(tree, sentence);
+
+        System.out.println();
+        System.out.println("=== parseToString() ===");
+        System.out.println(service.parseSentence(sentence));
     }
 
-    private static Param buildParam(String[] args) throws IOException {
-        if (args.length < 3) {
-            System.out.println("Usage: ParserUsageSample <sudachi-dict-dir> <chunker-model> <parser-model>");
-            System.out.println("Example: ParserUsageSample ./dict ./chunk.ipa.model ./dep.ipa.model");
-            System.out.println("Skip execution because required files are not provided.");
-            return null;
-        }
+    private static Param buildParam() throws IOException {
+        String baseDir = "src/test/resources";
+        // String baseDir = "src/main/resources";
 
-        String sudachiDictDir = args[0];
-        String chunkerModel = args[1];
-        String parserModel = args[2];
+        String sudachiDictDir = baseDir + "/sudachi";
+        String chunkerModel = baseDir + "/chunk.ipa.model";
+        String parserModel = baseDir + "/dep.ipa.model";
+        String neModel = baseDir + "/ne.ipa.model";
 
-        if (!Files.exists(Path.of(sudachiDictDir, "system_core.dic"))) {
-            throw new IllegalArgumentException("system_core.dic not found in: " + sudachiDictDir);
-        }
-        if (!Files.exists(Path.of(chunkerModel))) {
-            throw new IllegalArgumentException("chunker model not found: " + chunkerModel);
-        }
-        if (!Files.exists(Path.of(parserModel))) {
-            throw new IllegalArgumentException("parser model not found: " + parserModel);
-        }
+        validatePaths(sudachiDictDir, chunkerModel, parserModel, neModel);
 
         Param param = new Param();
         param.loadConfig();
         param.set(Param.SUDACHI_DICT, sudachiDictDir);
         param.set(Param.CHUNKER_MODEL, chunkerModel);
         param.set(Param.PARSER_MODEL, parserModel);
+        param.set(Param.NE_MODEL, neModel);
+        param.set(Param.NE, "1");
+        param.set(Param.OUTPUT_LAYER, String.valueOf(Constant.CABOCHA_OUTPUT_DEP));
+
         return param;
+    }
+
+    private static void validatePaths(
+            String sudachiDictDir,
+            String chunkerModel,
+            String parserModel,
+            String neModel) {
+
+        Path sudachiDirPath = Path.of(sudachiDictDir);
+
+        if (!Files.isDirectory(sudachiDirPath)) {
+            throw new IllegalArgumentException("Sudachi directory not found: " + sudachiDirPath.toAbsolutePath());
+        }
+        if (!Files.exists(sudachiDirPath.resolve("system_core.dic"))) {
+            throw new IllegalArgumentException("system_core.dic not found in: " + sudachiDirPath.toAbsolutePath());
+        }
+        if (!Files.exists(sudachiDirPath.resolve("sudachi.json"))) {
+            throw new IllegalArgumentException("sudachi.json not found in: " + sudachiDirPath.toAbsolutePath());
+        }
+        if (!Files.exists(Path.of(chunkerModel))) {
+            throw new IllegalArgumentException("chunker model not found: " + Path.of(chunkerModel).toAbsolutePath());
+        }
+        if (!Files.exists(Path.of(parserModel))) {
+            throw new IllegalArgumentException("parser model not found: " + Path.of(parserModel).toAbsolutePath());
+        }
+        if (!Files.exists(Path.of(neModel))) {
+            throw new IllegalArgumentException("NE model not found: " + Path.of(neModel).toAbsolutePath());
+        }
+    }
+
+    private static void dumpTree(Tree tree, String sentence) {
+        Map<String, String> expectedMap = buildExpectedMap(sentence);
+
+        System.out.println("=== Chunks / Tokens / NE ===");
+
+        for (int i = 0; i < tree.getChunkSize(); i++) {
+            Chunk chunk = tree.chunk(i);
+            System.out.println("[Chunk " + i + "] link=" + chunk.getLink() + ", surface=" + chunk.getSurface());
+
+            for (int j = 0; j < chunk.getTokenSize(); j++) {
+                Token token = chunk.token(j);
+
+                String surface = token.getSurface();
+                String actualNe = normalizeNeLabel(token.getAdditionalInfo());
+                String expectedNe = expectedMap.getOrDefault(surface, "O");
+                String judgement = actualNe.equals(expectedNe) ? "OK" : "NG";
+
+                System.out.println("  - surface      : " + surface);
+                System.out.println("    normalized   : " + token.getNormalizedSurface());
+                System.out.println("    pos/feature  : " + token.getFeature());
+                System.out.println("    actual NE    : " + actualNe);
+                System.out.println("    expected NE  : " + expectedNe);
+                System.out.println("    judgement    : " + judgement);
+            }
+        }
+
+        System.out.println("EOS");
+        System.out.println();
+
+        System.out.println("=== Expected NE summary ===");
+        for (Map.Entry<String, String> entry : expectedMap.entrySet()) {
+            if (!"O".equals(entry.getValue())) {
+                System.out.println(entry.getKey() + " -> " + entry.getValue());
+            }
+        }
+    }
+
+    private static String normalizeNeLabel(String label) {
+        if (label == null || label.isBlank()) {
+            return "O";
+        }
+        return label;
+    }
+
+    /**
+     * このサンプル文専用の「想定タイプ」定義。
+     * モデル推論ではなく、確認用の正解ラベルです。
+     */
+    private static Map<String, String> buildExpectedMap(String sentence) {
+        Map<String, String> map = new LinkedHashMap<>();
+
+        // まずは全部 O 扱い
+        map.put("2026", "B-DATE");
+        map.put("年", "I-DATE");
+        map.put("4", "I-DATE");
+        map.put("月", "I-DATE");
+        map.put("1日", "I-DATE");
+
+        map.put("午後", "B-TIME");
+        map.put("3", "I-TIME");
+        map.put("時", "I-TIME");
+
+        map.put("東京", "B-LOCATION");
+        map.put("駅", "I-LOCATION");
+
+        map.put("ソニー", "B-ORGANIZATION");
+        map.put("株式", "I-ORGANIZATION");
+        map.put("会社", "I-ORGANIZATION");
+
+        map.put("山田", "B-PERSON");
+        map.put("太郎", "I-PERSON");
+
+        map.put("1万", "B-MONEY");
+        map.put("円", "I-MONEY");
+
+        map.put("3", "B-COUNT");
+        map.put("枚", "I-COUNT");
+
+        map.put("20", "B-PERCENT");
+        map.put("%", "I-PERCENT");
+
+        return map;
     }
 }
